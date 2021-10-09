@@ -47,16 +47,16 @@ void loop() {
   Serial.println(WiFi.localIP());
   delay(10000);
 
-  float Luftfeuchtigkeit = dht.readHumidity(); //die Luftfeuchtigkeit auslesen und unter „Luftfeutchtigkeit“ speichern
+  float humidity = dht.readHumidity(); //die Luftfeuchtigkeit auslesen und unter „Luftfeutchtigkeit“ speichern
   
-  float Temperatur = dht.readTemperature();//die Temperatur auslesen und unter „Temperatur“ speichern
+  float temperature = dht.readTemperature();//die Temperatur auslesen und unter „Temperatur“ speichern
   
-  Serial.print("Luftfeuchtigkeit: "); //Im seriellen Monitor den Text und 
-  Serial.print(Luftfeuchtigkeit); //die Dazugehörigen Werte anzeigen
-  Serial.println(" %");
-  Serial.print("Temperatur: ");
-  Serial.print(Temperatur);
-  Serial.println(" Grad Celsius");
+//  Serial.print("Luftfeuchtigkeit: "); //Im seriellen Monitor den Text und 
+//  Serial.print(Luftfeuchtigkeit); //die Dazugehörigen Werte anzeigen
+//  Serial.println(" %");
+//  Serial.print("Temperatur: ");
+//  Serial.print(Temperatur);
+//  Serial.println(" Grad Celsius");
 
   WiFiClient client;
 
@@ -68,7 +68,9 @@ void loop() {
 
     Serial.print("[HTTP] GET...\n");
     // start connection and send HTTP header
-    int httpCode = http.POST("");
+    char buffer[60];
+    printf(buffer, "{\"temperature\":%f,\"humidity\":%f,\"waterlevel\":%d}", temperature, humidity, 1);
+    int httpCode = http.POST(String(buffer));
 
     // httpCode will be negative on error
     if (httpCode > 0) {
