@@ -2,20 +2,29 @@
 #include <ESP8266HTTPClient.h>
 #include "DHT.h"
 
+// PINs
+#define DHT_PIN 2 // A
+#define TRIG_PIN 9 // D
+#define ECHO_PIN 8 // D
+
 const char* ssid     = "DerKaiserKreis";
 const char* password = "30134535545372737722";
-const String apiKey = "";
+const String apiKey = "XpgZASSfFwnSah9GuzQjZewUDIKrps";
+const String baseUrl = "http://192.168.178.215:47336";
 
-DHT dht(2, DHT22);
+float filterArray[20];
+float waterLevel = 0.0;
+
+DHT dht(DHT_PIN, DHT22);
 
 void setup() {
   Serial.begin(115200);
-
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
   dht.begin();
 }
 
 void loop() {
-  
   // Bring up the WiFi connection
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -33,8 +42,9 @@ void loop() {
   delay(10000);
 
   float humidity = dht.readHumidity();
-  
   float temperature = dht.readTemperature();
+  float waterLevel = getWaterLevel();
+ 
   
 //  Serial.print("Luftfeuchtigkeit: ");
 //  Serial.print(Luftfeuchtigkeit); 
@@ -48,12 +58,12 @@ void loop() {
   HTTPClient http;
 
   Serial.print("[HTTP] begin...\n");
-  if (http.begin(client, "http://192.168.178.215:47336/api/v1/receive")) {  // HTTP
+  if (http.begin(client, baseUrl + "/api/v1/receive")) {  // HTTP
     http.addHeader("X-Greenhouse-Key", apiKey);
     Serial.print("[HTTP] GET...\n");
     // start connection and send HTTP header
     char buffer[60];
-    printf(buffer, "{\"temperature\":%f,\"humidity\":%f,\"waterlevel\":%d}", temperature, humidity, 67);
+    printf(buffer, "{\"temperature\":%f,\"humidity\":%f,\"waterlevel\":%f}", temperature, humidity, waterLevel);
     int httpCode = http.POST(String(buffer));
 
     // httpCode will be negative on error
@@ -82,4 +92,50 @@ void loop() {
 
   WiFi.forceSleepWake();
   delay(1);
+}
+
+float getWaterLevel() {
+  // 1. TAKING MULTIPLE MEASUREMENTS AND STORE IN AN ARRAY
+  for (int sample = 0; sample < 20; sample++) {
+    filterArray[sample] = ultrasonicMeasure();
+    delay(30); // to avoid untrasonic interfering
+  }
+
+  // 2. SORTING THE ARRAY IN ASCENDING ORDER
+  for (int i = 0; i < 19; i++) {
+    for (int j = i + 1; j < 20; j++) {
+      if (filterArray[i] > filterArray[j]) {
+        float swap = filterArray[i];
+        filterArray[i] = filterArray[j];
+        filterArray[j] = swap;
+      }
+    }
+  }
+
+  // 3. FILTERING NOISE
+  // + the five smallest samples are considered as noise -> ignore it
+  // + the five biggest  samples are considered as noise -> ignore it
+  // ----------------------------------------------------------------
+  // => get average of the 10 middle samples (from 5th to 14th)
+  double sum = 0;
+  for (int sample = 5; sample < 15; sample++) {
+    sum += filterArray[sample];
+  }
+
+  return sum / 10;
+}
+
+float ultrasonicMeasure() {
+  // generate 10-microsecond pulse to TRIG pin
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  // measure duration of pulse from ECHO pin
+  float duration_us = pulseIn(ECHO_PIN, HIGH);
+
+  // calculate the distance
+  float distance_cm = 0.017 * duration_us;
+
+  return distance_cm;
 }
