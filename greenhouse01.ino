@@ -18,7 +18,7 @@ float waterLevel = 0.0;
 DHT dht(DHT_PIN, DHT22);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   dht.begin();
@@ -43,15 +43,19 @@ void loop() {
 
   float humidity = dht.readHumidity();
   float temperature = dht.readTemperature();
-  float waterLevel = getWaterLevel();
+  float distance = getWaterLevelDistance();
+  float waterLevel = getWaterLevel(distance);
  
   
-//  Serial.print("Luftfeuchtigkeit: ");
-//  Serial.print(Luftfeuchtigkeit); 
-//  Serial.println(" %");
-//  Serial.print("Temperatur: ");
-//  Serial.print(Temperatur);
-//  Serial.println(" Grad Celsius");
+  Serial.print("Luftfeuchtigkeit: ");
+  Serial.print(humidity); 
+  Serial.println(" %");
+  Serial.print("Temperatur: ");
+  Serial.print(temperature);
+  Serial.println(" Grad Celsius");
+  Serial.print("Wasserstand: ");
+  Serial.print(waterLevel); 
+  Serial.println(" %");
 
   WiFiClient client;
 
@@ -94,7 +98,11 @@ void loop() {
   delay(1);
 }
 
-float getWaterLevel() {
+float getWaterLevel(float distance) {
+  return map(distance, 3.0, 55.0, 100.0, 0.0);
+}
+
+float getWaterLevelDistance() {
   // 1. TAKING MULTIPLE MEASUREMENTS AND STORE IN AN ARRAY
   for (int sample = 0; sample < 20; sample++) {
     filterArray[sample] = ultrasonicMeasure();
