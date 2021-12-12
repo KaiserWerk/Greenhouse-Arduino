@@ -1,19 +1,10 @@
-/*
-    This sketch establishes a TCP connection to a "quote of the day" service.
-    It sends a "hello" message, and then prints received data.
-*/
-
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include "DHT.h"
 
-#ifndef STASSID
-#define STASSID "DerKaiserKreis"
-#define STAPSK  "30134535545372737722"
-#endif
-
-const char* ssid     = STASSID;
-const char* password = STAPSK;
+const char* ssid     = "DerKaiserKreis";
+const char* password = "30134535545372737722";
+const String apiKey = "";
 
 DHT dht(2, DHT22);
 
@@ -24,13 +15,7 @@ void setup() {
 }
 
 void loop() {
-  WiFi.mode(WIFI_OFF);
-  WiFi.forceSleepBegin();
-  Serial.println("WiFi is down");
-  delay(20000);
-
-  WiFi.forceSleepWake();
-  delay(1);
+  
   // Bring up the WiFi connection
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -47,12 +32,12 @@ void loop() {
   Serial.println(WiFi.localIP());
   delay(10000);
 
-  float humidity = dht.readHumidity(); //die Luftfeuchtigkeit auslesen und unter „Luftfeutchtigkeit“ speichern
+  float humidity = dht.readHumidity();
   
-  float temperature = dht.readTemperature();//die Temperatur auslesen und unter „Temperatur“ speichern
+  float temperature = dht.readTemperature();
   
-//  Serial.print("Luftfeuchtigkeit: "); //Im seriellen Monitor den Text und 
-//  Serial.print(Luftfeuchtigkeit); //die Dazugehörigen Werte anzeigen
+//  Serial.print("Luftfeuchtigkeit: ");
+//  Serial.print(Luftfeuchtigkeit); 
 //  Serial.println(" %");
 //  Serial.print("Temperatur: ");
 //  Serial.print(Temperatur);
@@ -64,12 +49,11 @@ void loop() {
 
   Serial.print("[HTTP] begin...\n");
   if (http.begin(client, "http://192.168.178.215:47336/api/v1/receive")) {  // HTTP
-
-
+    http.addHeader("X-Greenhouse-Key", apiKey);
     Serial.print("[HTTP] GET...\n");
     // start connection and send HTTP header
     char buffer[60];
-    printf(buffer, "{\"temperature\":%f,\"humidity\":%f,\"waterlevel\":%d}", temperature, humidity, 1);
+    printf(buffer, "{\"temperature\":%f,\"humidity\":%f,\"waterlevel\":%d}", temperature, humidity, 67);
     int httpCode = http.POST(String(buffer));
 
     // httpCode will be negative on error
@@ -78,7 +62,7 @@ void loop() {
       Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 
       // file found at server
-      if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+      if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
         Serial.println(payload);
       }
@@ -90,4 +74,12 @@ void loop() {
   } else {
     Serial.printf("[HTTP} Unable to connect\n");
   }
+
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
+  Serial.println("WiFi is down");
+  delay(20000);
+
+  WiFi.forceSleepWake();
+  delay(1);
 }
