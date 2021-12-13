@@ -1,5 +1,7 @@
 # Greenhouse Arduino sketch
 
+To be used with the [Greenhouse API](https://github.com/KaiserWerk/Greenhouse-API).
+
 ## Prerequisites
 
 ### Software 
