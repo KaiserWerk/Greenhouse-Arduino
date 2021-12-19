@@ -6,18 +6,19 @@ To be used with the [Greenhouse API](https://github.com/KaiserWerk/Greenhouse-AP
 
 ### Software 
 
-* ESP8266 board support must be installed
-* requires the "ESP8266WiFi" and "ESP8266HttpClient" libraries
+* `#include "DHT.h"` for the DHT22 sensor
 
 ### Hardware
 
-* 1x NodeMCU ESP32/LoLin board
-* 1x water level sensor (in this case, an ultra sound sensor)
+* 1x Arduino Nano
+* 1x HC-SR04 ultrasonic sensor
 * 1x DHT22 temperature/humidity sensor
-* 4x soil moisture sensor (resistive or capacitive)
-* water tank (40L+)
-* enclosure
-* barrel connector (female)
+* 3x soil moisture sensor (resistive or capacitive)
+* 1x small fan (5V)
 * 2x step down converter (1x 5V, 1x 3.3V)
-* Cooler
-* wire connectors
+* 1x relay
+* Fitting enclosure
+* water tank (40L+)
+* barrel connector (female)
+* lots of wires and screw connectors
+
