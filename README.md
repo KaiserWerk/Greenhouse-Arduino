@@ -6,7 +6,7 @@ To be used with the [Greenhouse API](https://github.com/KaiserWerk/Greenhouse-AP
 
 ### Software 
 
-* `#include "DHT.h"` for the DHT22 sensor
+* You need the "DHT Sensor Library" by Adafruit for the DHT22 sensor. (`#include "DHT.h"` )
 
 ### Hardware
 
