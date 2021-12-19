@@ -50,7 +50,7 @@ void loop() {
   Serial.print(waterLevel);
   Serial.println("}");
   
-  delay(5000);
+  delay(20000);
 }
 
 float getWaterLevel(float distance) {
