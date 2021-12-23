@@ -1,9 +1,16 @@
 #include "DHT.h"
 
 // PINs
+#define SMS1_PIN A5 // A
+#define SMS2_PIN A6 // A
+#define SMS3_PIN A7 // A
 #define DHT_PIN 7 // D
 #define TRIG_PIN 9 // D
-#define ECHO_PIN 8 // D
+#define ECHO_PIN 10 // D
+#define RELAY_PIN 12 // D
+
+const int dry = 595;
+const int wet = 239;
 
 float filterArray[20];
 //float waterLevel = 0.0;
@@ -32,16 +39,6 @@ void loop() {
   }
   float waterLevel = getWaterLevel(distance);
  
-//  Serial.print("Luftfeuchtigkeit: ");
-//  Serial.print(humidity); 
-//  Serial.println("%");
-//  Serial.print("Temperatur: ");
-//  Serial.print(temperature);
-//  Serial.println("°C");
-//  Serial.print("Wasserstand: ");
-//  Serial.print(waterLevel); 
-//  Serial.println("%");
-
   Serial.print("{\"air_temperature\":");
   Serial.print(temperature);
   Serial.print(",\"humidity\":");
@@ -52,6 +49,8 @@ void loop() {
   
   delay(20000);
 }
+
+float 
 
 float getWaterLevel(float distance) {
   return map(distance, 3.0, 55.0, 100.0, 0.0);
